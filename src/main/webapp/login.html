@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta content="telephone=no" name="format-detection" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta name="viewport" content="width=320, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>用户登录</title>
+	
+	<link rel="apple-touch-icon-precomposed" href="images/apple-touch-icon.png"/>
+	<link href="css/reset.css" rel="stylesheet" type="text/css" />
+	<link href="css/head.css" rel="stylesheet" type="text/css" />
+	<link href="css/foot.css" rel="stylesheet" type="text/css" />
+	<link rel='stylesheet' type='text/css' href='css/user.css' />	
+	<link rel='stylesheet' type='text/css' href='css/weui.min.css' />	
+	<link rel='stylesheet' type='text/css' href='css/jquery-weui.min.css' />	
+
+	<script src="js/jquery-2.1.4.js" type="text/javascript"></script>
+	<script src="js/jquery-weui.min.js" type="text/javascript"></script>
+
+</head>
+
+<body> 
+
+	
+
+<section class="login">
+
+	<div class="form">
+
+		<form method="post" action="" onsubmit="return false;">
+
+		<ul style="margin-top: 100px;">
+
+			<li class="user-info name">
+				<input type="text" id="username" style="font-size:16px;line-height:16px;" placeholder="请输入您的工号" value="">	
+			</li>
+
+			<li class="user-info pwd">
+				<input  type="text" id="password" style="font-size:16px;line-height:16px;" placeholder="请输入您的密码" value="">
+			</li>
+			<li class="enter" style="color:#BBBBBB;">
+				提示：密码为身份证号或护照号后6位
+			</li>
+			<li class="enter">
+				<input id='btn_enter' type="button" class="btn" value="" />
+			</li>
+
+		</ul>
+
+		</form>	
+
+	</div>
+
+</section>
+
+</body>
+<script type="text/javascript">
+
+	$(function(){
+		
+		var $username = $("#username");
+		var $password = $("#password");
+		
+		$("#btn_enter").click(function(){
+			$.ajax({
+				type: "post",
+				url: "api/passport/signin",
+				data: {username: $username.val(), password: $password.val()}
+			}).done(function(data){
+				$.toast("欢迎您 "+data.content.name, function(){
+					location.href = "index.html";
+				});
+			}).fail(function(data){
+				$.toast(data.responseJSON.errmsg, "forbidden");
+			});
+		});
+		
+	});
+
+</script>
+</html> 
+
+
+

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+		<meta name="viewport" content="initial-scale=1, maximum-scale=3, minimum-scale=1, user-scalable=no">
+		<style>
+			.gift-item {
+				display:inline-block;
+				margin:0px;
+				background-image:url(images/item_bg.png);
+				background-repeat:no-repeat;
+				background-size:100%;
+				position:relative;
+				z-index:10;
+			}
+			
+			.gift-item.active{
+				z-index:200;
+			}
+			
+			.start-item {
+				display:inline-block;
+				margin:0px;
+				background-image:url(images/start.png)!important;
+				background-repeat:no-repeat;
+				background-size:100%;
+			}
+			.gift-mask{
+				width:110%;
+				height:110%;
+				left:-5%;
+				top:-7%;
+				position:absolute;
+				background-color:#000;
+				opacity:0.4;
+				z-index:100;
+				border-radius:20px;
+				display:none;
+			}
+			
+			.prize-mask{
+				top:0px;
+				left:0px;
+				width:100%;
+				height:100%;
+				position:absolute;
+				background-color:rgba(0,0,0,0.8);
+				z-index: 300;
+			}
+			
+			.custom-button{
+				width:70%;
+				background-color:#41BD43;
+				border-radius:5px;
+				height:50px;
+				border:0px;
+				color:#FFFFFF;
+				font-size:18px;
+			}
+			
+			.roll-light{
+				position:absolute;
+				width:100%;
+				z-index: -10;
+			}
+			
+			.point1{
+				background-image: url(images/point1.png);
+				background-size: 100%;
+				width:20px;
+				height:20px;
+				position:absolute;
+				top:0px;
+			}
+		</style>
+	<link rel='stylesheet' type='text/css' href='css/weui.min.css' />	
+	<link rel='stylesheet' type='text/css' href='css/jquery-weui.min.css' />	
+
+	<script src="js/jquery-2.1.4.js" type="text/javascript"></script>
+	<script src="js/jquery-weui.min.js" type="text/javascript"></script>
+	</head>
+	
+	<body style="background-image:url(images/bg.jpg);background-repeat:no-repeat;background-size:100%;text-align:center;">
+		<img src="images/title21.png" style="height:200px;margin:auto;"/>
+		<div id="c1" style="margin:auto;background-image:url(images/bg1.png);background-repeat:no-repeat;background-size:100%;padding:20px;box-sizing:border-box;position:relative;overflow:hidden;">
+			
+			<div id="c2" style="margin:auto;position:relative;">
+				<div class="gift-mask"></div>
+				<div id="item_0" class="gift-item">
+					<img style="width:100%;height:100%;" src="images/gift_04.png"/>
+				</div>
+				<div id="item_1" class="gift-item">
+					<img style="width:100%;height:100%;" src="images/gift_tks.png"/>
+				</div>
+				<div id="item_2" class="gift-item">
+					<img style="width:100%;height:100%;" src="images/gift_05.png"/>
+				</div>
+				<div id="item_7" class="gift-item">
+					<img style="width:100%;height:100%;" src="images/gift_tks.png"/>
+				</div>
+				<div class="gift-item start-item"></div>
+				<div id="item_3" class="gift-item">
+					<img style="width:100%;height:100%;" src="images/gift_05.png"/>
+				</div>
+				<div id="item_6" class="gift-item">
+					<img style="width:100%;height:100%;" src="images/gift_05.png"/>
+				</div>
+				<div id="item_5" class="gift-item">
+					<img style="width:100%;height:100%;" src="images/gift_tks.png"/>
+				</div>
+				<div id="item_4" class="gift-item">
+					<img style="width:100%;height:100%;" src="images/gift_tks.png"/>
+				</div>
+			</div>
+		</div> 
+		<div id="played_count" style="color: #FFFFFF;">已参与人数</div>
+		<div id="no_prize_result" class="prize-mask" style="display:none;">
+			<img src="images/no_prize.png" style="width:90%;"/>
+			<!-- <button class="custom-button">再来一次</button> -->
+		</div>
+		
+		<div id="prize_result" class="prize-mask" style="display:none;">
+			<div class="roll-light">
+				<img src="images/light.png" style="width:100%;"/>
+			</div>
+			<div style="margin-top: 60px;">
+				<p style="color:#FFFFFF;font-size:24px;">恭喜你获得了</p>
+				<img src="images/gift.png" style="width:30%;margin-top:30px;"/>
+				<p style="color:#FFFFFF;font-size:24px;" id="result_text"></p>
+			</div>
+			<!-- <button class="custom-button">查看奖品详情</button> -->
+		</div>
+		<!--<audio id="myaudio" src="xx.wav" controls="controls" loop="loop"></audio>-->
+	</body>
+	<script>
+		$(function(){
+			var window_width = $(document.body).width();
+			var box1_width = window_width*0.85;
+			var box2_width = box1_width*0.75;
+			var margin = (box1_width - box2_width)/4;
+			//console.log(margin);
+			var item_width = (box2_width-10)/3;
+			$("#c1").css({width: box1_width+"px", height: box1_width+"px"});
+			$("#c2").css({width: box2_width+"px", height: box2_width+"px"});
+			$("#c2").css({"margin-top":parseInt($("#c2").css("margin-left"))*0.8+"px"});
+			$("#c1 .gift-item").css({width: item_width+"px", height: item_width+"px"});
+			
+			getPrizeStatus(function(res){
+				$("#played_count").text("已参与人数 "+res.total);
+				if(res.result != null){
+					rank = res.result.rank+"";
+					gifts = giftPool[rank];
+					idx = Math.round((Math.random()*1000))%gifts.length;
+					gift = gifts[idx];
+					showResult();
+				}
+			});
+			
+			var counter = 0;
+			var radix = 1.1;
+			
+			var gift = null;
+			
+			var giftPool = {
+					"-1": [{idx: 1, value: 0}, {idx: 4, value: 0}, {idx: 5, value: 0}, {idx: 7, value: 0}],
+					"1": [],
+					"2": [],
+					"3": [],
+					"4": [{idx: 0, text: "四等奖"}],
+					"5": [{idx: 2, text: "五等奖"}, {idx: 3, text: "五等奖"}, {idx: 6, text: "五等奖"}],
+					"6": []
+			}
+			
+			$(".start-item").click(function(){
+				$(".gift-mask").show();
+				getPrizeRank(function(result){
+					roll();
+					rank = result+"";
+					gifts = giftPool[rank];
+					idx = Math.round((Math.random()*1000))%gifts.length;
+					gift = gifts[idx];
+				});
+			});
+			
+			function roll(){
+				$(".gift-item").removeClass("active");
+				var idx = counter%8;
+				$("#item_"+idx).addClass("active");
+				var step = 40 + Math.pow(radix, counter);
+				if(gift != null && counter%8 == gift.idx && counter>60){
+					setTimeout(showResult, 1500);
+					return;
+				}
+				counter++;
+				setTimeout(roll, step);
+			}
+			
+			function showResult(){
+				if(gift.value == 0){
+					$("#no_prize_result").show();
+				}else{
+					$("#prize_result").show();
+					$("#result_text").text(gift.text);
+				}
+			}
+			
+			function reset(){
+				counter = 0;
+				gift_idx = -1;
+				$(".gift-mask").hide();
+				$(".prize-mask").hide();
+			}
+			
+			/* $(".custom-button").click(function(){
+				reset();
+			}); */
+			
+			function getPrizeRank(callback){
+				$.ajax({
+					url: "api/lottery/rank?id=1",
+					type: "get",
+					success: function(res){
+						if(typeof callback == "function"){
+							callback.apply(this, [res.rank]);
+						}
+					},
+					error: function(xhr){
+						$.toast(xhr.responseJSON.errmsg);
+					}
+				});
+			}
+			
+			function getPrizeStatus(callback){
+				$.ajax({
+					url: "api/lottery/status?id=1",
+					type: "get",
+					success: function(res){
+						if(typeof callback == "function"){
+							callback.apply(this, [res]);
+						}
+					},
+					error: function(xhr){
+						$.toast(xhr.responseJSON.errmsg);
+					}
+				});
+			}
+		});
+	</script>
+</html>
